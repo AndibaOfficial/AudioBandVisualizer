@@ -1,10 +1,10 @@
 # Real Time Audio Frequency Band Visualizer
 ### Project Description
 This application allows you to take an input and separate the audio into pre-selected frequency bands:
-- 10-450hz (Bottom Waveform)
+- 10-350hz (Bottom Waveform)
 - 450-700hz (2nd Waveform from Bottom)
-- 700-1500hz (3rd Waveform from Bottom)
-- 1500-5000hz (Top Waveform)
+- 800-1500hz (3rd Waveform from Bottom)
+- 1750-5000hz (Top Waveform)
 
 
 This is the first step in this project.
