@@ -8,6 +8,10 @@ import sys
 
 # use this backend to display in separate Tk window
 56
+CHUNK = 1024 * 2                # samples per frame
+FORMAT = pyaudio.paInt16        # audio format (bytes per sample?)
+CHANNELS = 1                    # single channel for microphone
+RATE = 44100                    # samples per second
 
 def butter_lowpass(cutoff, fs, order=9):
     return signal.butter(order, cutoff, fs=fs, btype='low', analog=False)
@@ -27,10 +31,7 @@ def bandpassfilter(data, lowcut, highcut, fs, order=3):
     return y
 
 def getpyaudio(testing):
-    CHUNK = 1024 * 2                # samples per frame
-    FORMAT = pyaudio.paInt16        # audio format (bytes per sample?)
-    CHANNELS = 1                    # single channel for microphone
-    RATE = 44100                    # samples per second
+    global CHUNK, FORMAT, CHANNELS, RATE
 
     # pyaudio class instance
     p = pyaudio.PyAudio()
@@ -61,9 +62,7 @@ def getpyaudio(testing):
     return stream
 
 def runpyplot(testing):
-    # constants
-    CHUNK = 1024 * 2                # samples per frame
-    RATE = 44100                    # samples per second
+    global CHUNK, FORMAT, CHANNELS, RATE
 
     # create matplotlib figure and axes
     plt.style.use('dark_background')
@@ -76,23 +75,20 @@ def runpyplot(testing):
     stream = getpyaudio(testing)
 
     # variable for plotting
-    x = np.arange(0, 4 * CHUNK, 4)
+    x = np.arange(0, 8 * CHUNK, 8)
 
     # create a line object with random data
     line, = ax.plot(x, np.random.rand(CHUNK), '-', lw=.5)
     line2, = ax.plot(x, np.random.rand(CHUNK), '-', lw=.5)
     line3, = ax.plot(x, np.random.rand(CHUNK), '-', lw=.5)
     line4, = ax.plot(x, np.random.rand(CHUNK), '-', lw=.5)
-    line5, = ax.plot(x, np.random.rand(CHUNK), '-', lw=.5)
+    # line5, = ax.plot(x, np.random.rand(CHUNK), '-', lw=.5)
 
     # basic formatting for the axes
-    ax.set_title('AUDIO WAVEFORM')
-    ax.set_xlabel('samples')
-    ax.set_ylabel('volume')
     ax.set_ylim(-128, 383)
-    ax.set_xlim(0, 4 * CHUNK)
+    ax.set_xlim(0, 8 * CHUNK)
     TICK = 128
-    plt.setp(ax, xticks=[0, CHUNK*2, 4 * CHUNK], yticks=[-TICK, TICK*0, TICK*1, TICK*2, TICK*4])
+    plt.setp(ax, xticks=[0, CHUNK*2, 4 * CHUNK,8 * CHUNK], yticks=[-TICK*2,-TICK, TICK*0, TICK*1, TICK*2, TICK*4])
 
     # show the plot
     plt.show(block=False)
@@ -104,13 +100,14 @@ def runpyplot(testing):
     start_time = time.time()
     fig.patch.set_visible(False)
 
+    counter = 0
     while True:
         BASE = 64
         # binary data
         data = stream.read(CHUNK)
         
         data_np = np.frombuffer(data, dtype=np.int16)/500
-        
+
         # semi-arbitrary decision for filters
         bandpass1 = bandpassfilter(data_np*2, 10,450, RATE)*3
         bandpass2 = bandpassfilter(data_np*2, 450, 700, RATE)*4
@@ -120,22 +117,23 @@ def runpyplot(testing):
         #Offsets for drawing to the screen
         bandpass1 -= BASE
         bandpass2 += BASE
-        bandpass3 += BASE*2
-        bandpass4 += BASE*3
-        data_np = (data_np*5) + BASE*6
+        bandpass3 += BASE*3
+        bandpass4 += BASE*5
+        # data_np = (data_np*5) + BASE*6
 
         # add data to lines to draw them
         line.set_ydata(bandpass1)
         line2.set_ydata(bandpass2)
         line3.set_ydata(bandpass3)
         line4.set_ydata(bandpass4)
-        line5.set_ydata(data_np)
 
         # update figure canvas
         try:
             fig.canvas.draw()
-            fig.canvas.flush_events()
+            if counter % 2 == 0:
+                fig.canvas.flush_events()
             frame_count += 1
+            counter+=1
 
         except TclError:
 
