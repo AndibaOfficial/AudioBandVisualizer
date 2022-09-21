@@ -1,27 +1,13 @@
-"""
-Notebook for streaming data from a microphone in realtime
-audio is captured using pyaudio
-then converted from binary data to ints using struct
-then displayed using matplotlib
-if you don't have pyaudio, then run
->>> pip install pyaudio
-note: with 2048 samples per chunk, I'm getting 20FPS
-"""
-
 import pyaudio
 import numpy as np
 import matplotlib.pyplot as plt
 import time
 from tkinter import TclError
 from scipy import signal
+import sys
 
 # use this backend to display in separate Tk window
 56
-
-# VARS CONSTS:
-_VARS = {'window': False,
-         'stream': False,
-         'audioData': np.array([])}
 
 def butter_lowpass(cutoff, fs, order=9):
     return signal.butter(order, cutoff, fs=fs, btype='low', analog=False)
@@ -40,8 +26,7 @@ def bandpassfilter(data, lowcut, highcut, fs, order=3):
     y = signal.lfilter(b, a, data)
     return y
 
-
-def getpyaudio():
+def getpyaudio(testing):
     CHUNK = 1024 * 2                # samples per frame
     FORMAT = pyaudio.paInt16        # audio format (bytes per sample?)
     CHANNELS = 1                    # single channel for microphone
@@ -53,12 +38,15 @@ def getpyaudio():
     # get list of availble inputs
     info = p.get_host_api_info_by_index(0)
     inputdevice = 0
-    numdevices = info.get('deviceCount')
-    for i in range(0, numdevices):
-        if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
-            if p.get_device_info_by_host_api_device_index(0, i).get('name') == "Line (AudioBox Go)":
-                inputdevice = i
+    if testing:
+        inputdevice = 5
+    else:
+        numdevices = info.get('deviceCount')
+        for i in range(0, numdevices):
+            if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+                print ("Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name'))
 
+        inputdevice = input("Enter in the device you want to use:")
 
     # stream object to get data from microphone (currently using line in connected to midi controller)
     stream = p.open(
@@ -72,17 +60,20 @@ def getpyaudio():
     )
     return stream
 
-def runpyplot():
+def runpyplot(testing):
     # constants
     CHUNK = 1024 * 2                # samples per frame
     RATE = 44100                    # samples per second
 
     # create matplotlib figure and axes
     plt.style.use('dark_background')
-    fig, ax = plt.subplots(1, figsize=(15, 7))
+    fig, ax = plt.subplots(1, figsize=(10, 5))
+    
+    # showing only the subplot
+    fig.subplots_adjust(left=0, right=1, bottom=0, top=1, wspace=0, hspace=0)
 
     # pyaudio class instance
-    stream = getpyaudio()
+    stream = getpyaudio(testing)
 
     # variable for plotting
     x = np.arange(0, 4 * CHUNK, 4)
@@ -92,6 +83,7 @@ def runpyplot():
     line2, = ax.plot(x, np.random.rand(CHUNK), '-', lw=.5)
     line3, = ax.plot(x, np.random.rand(CHUNK), '-', lw=.5)
     line4, = ax.plot(x, np.random.rand(CHUNK), '-', lw=.5)
+    line5, = ax.plot(x, np.random.rand(CHUNK), '-', lw=.5)
 
     # basic formatting for the axes
     ax.set_title('AUDIO WAVEFORM')
@@ -99,7 +91,8 @@ def runpyplot():
     ax.set_ylabel('volume')
     ax.set_ylim(-128, 383)
     ax.set_xlim(0, 4 * CHUNK)
-    plt.setp(ax, xticks=[0, CHUNK*2, 4 * CHUNK], yticks=[-128, 0, 128, 383])
+    TICK = 128
+    plt.setp(ax, xticks=[0, CHUNK*2, 4 * CHUNK], yticks=[-TICK, TICK*0, TICK*1, TICK*2, TICK*4])
 
     # show the plot
     plt.show(block=False)
@@ -122,19 +115,21 @@ def runpyplot():
         bandpass1 = bandpassfilter(data_np*2, 10,450, RATE)*3
         bandpass2 = bandpassfilter(data_np*2, 450, 700, RATE)*4
         bandpass3 = bandpassfilter(data_np*2, 700, 1500, RATE)*5
-        bandpass4 = bandpassfilter(data_np*2, 2000, 5000, RATE)*6
+        bandpass4 = bandpassfilter(data_np*2, 1500, 5000, RATE)*6
 
         #Offsets for drawing to the screen
         bandpass1 -= BASE
         bandpass2 += BASE
         bandpass3 += BASE*2
-        bandpass4 += BASE*4
+        bandpass4 += BASE*3
+        data_np = (data_np*5) + BASE*6
 
         # add data to lines to draw them
         line.set_ydata(bandpass1)
         line2.set_ydata(bandpass2)
         line3.set_ydata(bandpass3)
         line4.set_ydata(bandpass4)
+        line5.set_ydata(data_np)
 
         # update figure canvas
         try:
@@ -151,4 +146,7 @@ def runpyplot():
             print('average frame rate = {:.0f} FPS'.format(frame_rate))
             break
 
-runpyplot()
+
+if __name__=="__main__":
+    testing = True if len(sys.argv) > 1 else False
+    runpyplot(testing)
