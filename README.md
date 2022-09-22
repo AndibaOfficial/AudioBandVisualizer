@@ -14,10 +14,13 @@ Now that we have processed the audio and have the relevant metadata, the next st
 ### Frequency Mode
 <img src="https://media.giphy.com/media/Ne4ZFyWwZqDR2KBqQr/giphy.gif" width="800" height="500" /><br>
 
+#### Youtube Clip
+[See it On YouTube](https://youtu.be/WPhGKLTHv-c)
+
 ### Visual Mode
 <img src="https://media.giphy.com/media/lafIYfHJZObd2d77kJ/giphy.gif" width="800" height="500" />
 
-#### Youtube Clip of it in action
+#### Youtube Clip
 [See It On YouTube](https://youtu.be/QM9XnN9dogA)
 
 # How to run
