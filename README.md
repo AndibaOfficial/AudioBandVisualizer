@@ -10,7 +10,15 @@ This application allows you to take an input and separate the audio into pre-sel
 This is the first step in this project.
 
 Now that we have processed the audio and have the relevant metadata, the next steps will be to use the information from the different frequency to control visual elements to make preset visuals react in real time to the audio being fed to the system
-<img src="https://media.giphy.com/media/Ne4ZFyWwZqDR2KBqQr/giphy.gif" width="800" height="500" />
+
+### Frequency Mode
+<img src="https://media.giphy.com/media/Ne4ZFyWwZqDR2KBqQr/giphy.gif" width="800" height="500" /><br>
+
+### Visual Mode
+<img src="https://media.giphy.com/media/lafIYfHJZObd2d77kJ/giphy.gif" width="800" height="500" />
+
+#### Youtube Clip of it in action
+[See It On YouTube](https://youtu.be/QM9XnN9dogA)
 
 # How to run
 ## Download Python and PIP
@@ -22,7 +30,7 @@ pip3 install -r requirements
 ``` 
 ## Run script
 ```
-python realtimeaudiovisualizer.py
+python realtimeaudiovisualizer.py [mode=frequency,visual]
 ```
 Once you start the script, it will advise you to pick the input you want to analyze:
 ```
