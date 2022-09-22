@@ -6,6 +6,7 @@ This application allows you to take an input and separate the audio into pre-sel
 - 800-1500hz (3rd Waveform from Bottom)
 - 1750-5000hz (Top Waveform)
 
+**As of now, you will need an input device feeding the data, such as an audio card or a microphone in order for this to work**
 
 This is the first step in this project.
 
